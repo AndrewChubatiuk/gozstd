@@ -98,8 +98,14 @@ func NewReaderDict(r io.Reader, dd *DDict) *Reader {
 	return zr
 }
 
+// Reset resets zr to read from r.
+func (zr *Reader) Reset(r io.Reader) error {
+	zr.ResetWithDict(r, nil)
+	return nil
+}
+
 // Reset resets zr to read from r using the given dictionary dd.
-func (zr *Reader) Reset(r io.Reader, dd *DDict) {
+func (zr *Reader) ResetWithDict(r io.Reader, dd *DDict) {
 	zr.inBuf.size = 0
 	zr.inBuf.pos = 0
 	zr.outBuf.size = 0
@@ -126,17 +132,19 @@ func freeDStream(v interface{}) {
 	v.(*Reader).Release()
 }
 
-// Release releases all the resources occupied by zr.
+// Close releases all the resources occupied by zr.
 //
 // zr cannot be used after the release.
-func (zr *Reader) Release() {
+func (zr *Reader) Close() error {
 	if zr.ds == nil {
-		return
+		return nil
 	}
 
 	result := C.ZSTD_freeDStream_wrapper(
 		C.uintptr_t(uintptr(unsafe.Pointer(zr.ds))))
-	ensureNoError("ZSTD_freeDStream", result)
+	if err := getError("ZSTD_freeDStream", result); err != nil {
+		return err
+	}
 	zr.ds = nil
 
 	C.free(zr.inBuf.src)
@@ -149,6 +157,14 @@ func (zr *Reader) Release() {
 
 	zr.r = nil
 	zr.dd = nil
+	return nil
+}
+
+// Release calls Close method
+func (zr *Reader) Release() {
+	if err := zr.Close(); err != nil {
+		panic(err)
+	}
 }
 
 // WriteTo writes all the data from zr to w.

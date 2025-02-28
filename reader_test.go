@@ -226,7 +226,7 @@ func TestReaderInvalidData(t *testing.T) {
 	cd[len(cd)-1]++
 
 	r = bytes.NewReader(cd)
-	zr.Reset(r, nil)
+	zr.Reset(r)
 
 	if _, err := ioutil.ReadAll(zr); err == nil {
 		t.Fatalf("expecting error when decompressing corrupted data")
@@ -280,7 +280,7 @@ func testReaderSerial(s string, cd []byte) error {
 	defer zr.Release()
 	for i := 0; i < 2; i++ {
 		r := bytes.NewReader(cd)
-		zr.Reset(r, nil)
+		zr.Reset(r)
 		if err := testReaderExt(zr, s); err != nil {
 			return err
 		}

@@ -318,13 +318,20 @@ func errStr(result C.size_t) string {
 }
 
 func ensureNoError(funcName string, result C.size_t) {
+	if err := getError(funcName, result); err != nil {
+		panic(err)
+	}
+}
+
+func getError(funcName string, result C.size_t) error {
 	if int(result) >= 0 {
 		// Fast path - avoid calling C function.
-		return
+		return nil
 	}
 	if C.ZSTD_getErrorCode(result) != 0 {
-		panic(fmt.Errorf("BUG: unexpected error in %s: %s", funcName, errStr(result)))
+		return fmt.Errorf("BUG: unexpected error in %s: %s", funcName, errStr(result))
 	}
+	return nil
 }
 
 func streamDecompress(dst, src []byte, dd *DDict) ([]byte, error) {
@@ -371,7 +378,7 @@ func getStreamDecompressor(dd *DDict) *streamDecompressor {
 		v = sd
 	}
 	sd := v.(*streamDecompressor)
-	sd.zr.Reset((*srcReader)(sd), dd)
+	sd.zr.ResetWithDict((*srcReader)(sd), dd)
 	return sd
 }
 
@@ -379,7 +386,7 @@ func putStreamDecompressor(sd *streamDecompressor) {
 	sd.dst = nil
 	sd.src = nil
 	sd.srcOffset = 0
-	sd.zr.Reset(nil, nil)
+	sd.zr.Reset(nil)
 	streamDecompressorPool.Put(sd)
 }
 
