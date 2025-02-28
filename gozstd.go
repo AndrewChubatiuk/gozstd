@@ -371,7 +371,7 @@ func getStreamDecompressor(dd *DDict) *streamDecompressor {
 		v = sd
 	}
 	sd := v.(*streamDecompressor)
-	sd.zr.Reset((*srcReader)(sd), dd)
+	sd.zr.ResetWithDict((*srcReader)(sd), dd)
 	return sd
 }
 
@@ -379,7 +379,7 @@ func putStreamDecompressor(sd *streamDecompressor) {
 	sd.dst = nil
 	sd.src = nil
 	sd.srcOffset = 0
-	sd.zr.Reset(nil, nil)
+	sd.zr.Reset(nil)
 	streamDecompressorPool.Put(sd)
 }
 

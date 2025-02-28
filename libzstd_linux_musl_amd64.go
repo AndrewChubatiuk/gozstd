@@ -1,3 +1,4 @@
+//go:build musl
 // +build musl
 
 package gozstd

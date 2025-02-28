@@ -43,7 +43,7 @@ func benchmarkReaderDict(b *testing.B, blockSize, level int) {
 				}
 			}
 			r.Reset(cd)
-			zr.Reset(r, bd.dd)
+			zr.ResetWithDict(r, bd.dd)
 		}
 	})
 }
@@ -83,7 +83,7 @@ func benchmarkReader(b *testing.B, blockSize, level int) {
 				}
 			}
 			r.Reset(cd)
-			zr.Reset(r, nil)
+			zr.Reset(r)
 		}
 	})
 }

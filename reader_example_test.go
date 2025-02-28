@@ -46,7 +46,7 @@ func ExampleReader_Reset() {
 	for i := 0; i < 3; i++ {
 		compressedData := Compress(nil, []byte(fmt.Sprintf("line %d", i)))
 		r := bytes.NewReader(compressedData)
-		zr.Reset(r, nil)
+		zr.Reset(r)
 
 		data, err := ioutil.ReadAll(zr)
 		if err != nil {
